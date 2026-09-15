@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <base target="_top">
+  <style>
+    :root{color-scheme:dark;--gold:#dbb879;--text:#f5f4ef;--muted:#b8c4d0;--bg:#102031;--line:#536171}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.7 "Noto Sans TC","Microsoft JhengHei",sans-serif}main{max-width:760px;margin:auto;padding:28px}h1{font-size:1.4rem;margin:0 0 8px;color:var(--gold)}h2{font-size:1.25rem;margin:0 0 12px}p{margin:0 0 12px;overflow-wrap:anywhere}a{color:var(--gold)}.muted{color:var(--muted);font-size:.9rem}.event{border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:22px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.full{grid-column:1/-1}label{display:block;margin-bottom:7px;font-weight:600}label small{font-size:.8rem;font-weight:400;color:var(--muted);margin-left:6px}input,select,textarea,button{font:inherit}input,select,textarea{display:block;width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:4px;background:#081421;color:var(--text);min-width:0}textarea{resize:vertical}fieldset{border:0;padding:0;margin:0;min-width:0}fieldset:disabled{opacity:.6}.consent{display:flex;align-items:flex-start;gap:11px;font-size:.9rem;font-weight:400;margin:20px 0}.consent input{width:20px;height:20px;flex:0 0 20px;margin-top:4px;accent-color:var(--gold)}button{width:100%;min-height:52px;padding:12px;border:0;border-radius:4px;background:var(--gold);color:#102031;font-weight:700;cursor:pointer}button:disabled{opacity:.55;cursor:wait}button.secondary{background:transparent;color:var(--gold);border:1px solid var(--line);margin-top:12px}input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #f4d8a7;outline-offset:3px}.status{margin-top:16px;white-space:pre-line}.status.error{color:#ffcfbd}.receipt{border:1px solid var(--gold);padding:24px;background:#091724}.receipt-code{color:var(--gold);font-size:clamp(1.15rem,4vw,1.6rem);font-weight:bold;letter-spacing:.06em;overflow-wrap:anywhere}.receipt dl{margin:22px 0}.receipt dl div{margin:10px 0}.receipt dt{font-size:.85rem;color:var(--muted)}.receipt dd{margin:0}.trap{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}[hidden]{display:none!important}#contact-info{white-space:pre-line}#receipt:focus{outline:none}@media(max-width:480px){main{padding:22px 18px}.grid{grid-template-columns:1fr;gap:16px}.receipt{padding:20px}}
+  </style>
+</head>
+<body>
+<main>
+  <div id="intro" class="event">
+    <h1>電影《再次成為神》特映會</h1>
+    <p>2026/9/20（日）下午 1:30<br>1:00 開放入場｜台南市勞工育樂中心</p>
+    <p class="muted" id="price">正在載入報名資訊…</p>
+    <p class="muted" id="distributor">發行公司：雄獅影視</p>
+    <p class="muted" id="contact-info">主辦：雄獅影視<br>聯絡：陳小姐 0930-885-835</p>
+    <p class="muted"><a id="contact-call" href="tel:0930885835">電話洽詢</a></p>
+  </div>
+  <p id="loading" role="status">請稍候，正在確認本場報名狀態。</p>
+  <button id="reload" type="button" class="secondary" hidden>重新載入報名資訊</button>
+  <form id="form" hidden>
+    <fieldset id="fields">
+      <div class="grid">
+        <div><label for="name">報名人姓名<small>必填</small></label><input id="name" name="name" required maxlength="60" autocomplete="name" placeholder="請填寫姓名"></div>
+        <div><label for="phone">聯絡電話<small>必填</small></label><input id="phone" name="phone" required type="tel" inputmode="tel" maxlength="30" autocomplete="tel" placeholder="手機或含區碼的市話"></div>
+        <div><label for="quantity">報名人數<small>含本人</small></label><select id="quantity" name="ticketQty" required></select></div>
+        <div><label for="contact">LINE 或 Email<small>選填</small></label><input id="contact" name="contact" maxlength="150" placeholder="方便聯繫的方式"></div>
+        <div class="full"><label for="occupation">職業<small>選填</small></label><input id="occupation" name="occupation" maxlength="80" placeholder="例如：退休、教師、上班族"></div>
+        <div class="full"><label for="source">從哪裡得知活動？<small>選填</small></label><select id="source" name="source"><option value="">請選擇</option><option>朋友邀請</option><option>LINE</option><option>Facebook</option><option>Instagram</option><option>Threads</option><option>網站</option><option>其他</option></select></div>
+        <div class="full"><label for="note">備註<small>選填</small></label><textarea id="note" name="note" rows="2" maxlength="500" placeholder="其他需要告知的事項"></textarea></div>
+      </div>
+      <div class="trap" aria-hidden="true"><label for="website">請留空</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div>
+      <label class="consent"><input id="consent" type="checkbox" required><span id="consent-text">我同意雄獅影視將以上資料用於本次報名與活動聯繫。</span></label>
+    </fieldset>
+    <button id="submit" type="submit">送出報名</button>
+    <p class="muted" style="margin-top:12px">看到「報名成功」就代表完成，無需保留編號或截圖。本系統不會自動寄送確認信。</p>
+  </form>
+  <p id="status" class="status" role="status" aria-live="polite"></p>
+  <section id="receipt" class="receipt" hidden tabindex="-1" aria-labelledby="receipt-title">
+    <h2 id="receipt-title">報名成功</h2>
+    <p class="muted">已完成報名，無需保留編號或截圖。請於活動當天到場付款。</p>
+    <dl><div><dt>活動</dt><dd id="receipt-name"></dd></div><div><dt>日期與時間</dt><dd id="receipt-time"></dd></div><div><dt>地點</dt><dd id="receipt-venue"></dd></div><div><dt>報名人數</dt><dd id="receipt-qty"></dd></div><div><dt>票價與付款</dt><dd id="receipt-price"></dd></div><div><dt>主辦單位</dt><dd id="receipt-organizer"></dd></div><div><dt>發行公司</dt><dd id="receipt-distributor"></dd></div></dl>
+    <p class="muted">13:00 開放入場，13:30 放映。入場依現場工作人員指引。</p>
+    <p id="receipt-contact" class="muted"></p>
+    <p class="muted"><a id="receipt-call" hidden>電話洽詢</a></p>
+  </section>
+  <noscript>報名表需要 JavaScript。請開啟瀏覽器的 JavaScript 後重新載入。</noscript>
+</main>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const boot = <?!= bootstrapJSON ?>;
+  let eventData = null;
+  let pending = null;
+  let busy = false;
+  let completed = false;
+  const message = (text, error = false) => { $('status').textContent = text; $('status').classList.toggle('error', error); };
+  const requestId = () => {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    if (window.crypto && crypto.getRandomValues) return Array.from(crypto.getRandomValues(new Uint8Array(16)), n => n.toString(16).padStart(2, '0')).join('');
+    return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+  };
+  function storageValue(storage, key, create) {
+    try { const value = storage.getItem(key); if (value) return value; const fresh=create(); storage.setItem(key,fresh); return fresh; } catch (_) { return create(); }
+  }
+  let context = boot.context;
+  if (!context) {
+    let v, s;
+    try { v=storageValue(localStorage,'divine0920:standalone:visitor',requestId); } catch (_) { v=requestId(); }
+    try { s=storageValue(sessionStorage,'divine0920:standalone:session',requestId); } catch (_) { s=requestId(); }
+    context={visitor_id:v,session_id:s,utm_source:'direct',utm_medium:'none',page_url:boot.service_url||'',referrer:'',device:/Mobile|iPhone|Android/i.test(navigator.userAgent)?'mobile':'desktop',user_agent:navigator.userAgent.slice(0,500)};
+  }
+  const embedded=!!(boot.parent_origin && boot.bridge_id && window.top!==window);
+  function notify(type, extra={}) {
+    if (embedded) window.top.postMessage(Object.assign({channel:'divine-tracking-v1',bridge_id:boot.bridge_id,type},extra),boot.parent_origin);
+  }
+  let localQueue=[], localBusy=false;
+  function localFlush() {
+    if (!localQueue.length || localBusy) return;
+    const batch=localQueue.slice(0,10); localBusy=true;
+    google.script.run.withSuccessHandler(result=>{
+      localBusy=false;
+      if(result && result.ok) { const ids=new Set(result.accepted); localQueue=localQueue.filter(e=>!ids.has(e.event_id)); }
+    }).withFailureHandler(()=>{localBusy=false;}).trackEvents(batch);
+  }
+  function localEvent(name) {
+    localQueue.push(Object.assign({},context,{event_name:name,event_time:new Date().toISOString(),event_id:requestId(),record_id:''})); localFlush();
+  }
+  window.addEventListener('message',e=>{
+    const m=e.data;
+    if(!embedded || e.source!==window.top || e.origin!==boot.parent_origin || !m || m.channel!=='divine-tracking-v1' || m.bridge_id!==boot.bridge_id || m.type!=='events' || !Array.isArray(m.events) || m.events.length>10) return;
+    google.script.run.withSuccessHandler(r=>notify('ack',{request_id:m.request_id,ok:!!(r&&r.ok),accepted:r&&r.accepted||[]}))
+      .withFailureHandler(()=>notify('ack',{request_id:m.request_id,ok:false,accepted:[]})).trackEvents(m.events);
+  });
+  let firstInput=false;
+  function started(e) {
+    if(firstInput || !e.target.matches('input,select,textarea') || e.target.id==='website' || e.target.id==='consent') return;
+    firstInput=true; localEvent('form_start'); notify('form_start');
+  }
+  $('form').addEventListener('input',started); $('form').addEventListener('change',started);
+  setInterval(localFlush,10000);
+  function trackingReady() {
+    notify('ready',{version:boot.version});
+    if(!embedded) localEvent('page_view');
+  }
+  function setContactLink(id, phone) {
+    const link = $(id);
+    const valid = /^09[0-9]{8}$/.test(phone || '');
+    link.hidden = !valid;
+    if (valid) link.href = 'tel:' + phone;
+    else link.removeAttribute('href');
+  }
+  function load() {
+    $('reload').hidden = true;
+    $('loading').textContent = '請稍候，正在確認本場報名狀態。';
+    $('loading').hidden = false;
+    if (!(window.google && google.script && google.script.run)) { loadFailed(); return; }
+    google.script.run.withSuccessHandler(result => {
+      if (!result || result.ok !== true) { loadFailed(); return; }
+      eventData = result.event;
+      trackingReady();
+      $('price').textContent = eventData.priceText;
+      $('distributor').textContent = '發行公司：' + eventData.distributor;
+      const contact = [eventData.organizer && '主辦：' + eventData.organizer, eventData.contactText && '聯絡：' + eventData.contactText].filter(Boolean).join('\n');
+      $('contact-info').textContent = contact;
+      $('contact-info').hidden = !contact;
+      setContactLink('contact-call', eventData.contactPhone);
+      $('consent-text').textContent = '我同意' + (eventData.organizer || '主辦單位') + '將以上資料用於本次報名與活動聯繫，並將匿名活動來源與本次報名連結，用於成效分析。';
+      if (!result.open) { $('loading').textContent = result.message; return; }
+      const limit = result.remaining === null ? result.maxTickets : Math.min(result.maxTickets, result.remaining);
+      $('quantity').replaceChildren(...Array.from({length: limit}, (_, i) => { const o = document.createElement('option'); o.value = String(i + 1); o.textContent = (i + 1) + ' 位'; return o; }));
+      $('loading').hidden = true;
+      $('form').hidden = false;
+    }).withFailureHandler(loadFailed).getPublicEvent();
+  }
+  function loadFailed() {
+    $('loading').textContent = '目前無法載入報名表，請稍後重試；若持續無法使用，請聯絡主辦單位。';
+    $('reload').hidden = false;
+  }
+  function uncertain(text) {
+    busy = false;
+    // 結果未知時保留原資料與請求碼，只允許核對同一筆，避免不確定狀態下改資料重送。
+    $('fields').disabled = true;
+    $('submit').disabled = false;
+    $('submit').textContent = '再次確認';
+    message(text || '連線中斷，尚未確認結果。請按「再次確認」，核對同一筆報名。', true);
+  }
+  $('form').addEventListener('submit', e => {
+    e.preventDefault();
+    if (busy || completed || !eventData) return;
+    if (!pending) {
+      if (!$('form').reportValidity()) return;
+      pending = {requestId: requestId(), eventId: eventData.id, name: $('name').value.trim(), phone: $('phone').value.trim(),
+        ticketQty: Number($('quantity').value), contact: $('contact').value.trim(), source: $('source').value,
+        occupation: $('occupation').value.trim(), tracking: context, note: $('note').value.trim(), consent: $('consent').checked, website: $('website').value};
+    }
+    busy = true;
+    $('fields').disabled = true;
+    $('submit').disabled = true;
+    $('submit').textContent = '正在確認報名…';
+    message('正在確認座位與寫入資料，請保持此頁開啟。');
+    google.script.run.withSuccessHandler(result => {
+      busy = false;
+      if (!result || (result.ok === true && !/^TN0920-[A-F0-9]{10}$/.test(result.bookingId || ''))) { uncertain(); return; }
+      if (result.ok !== true) {
+        if (result.retry) { uncertain(result.message); return; }
+        pending = null;
+        $('fields').disabled = false;
+        $('submit').disabled = false;
+        $('submit').textContent = '送出報名';
+        message(result.message || '未完成報名，請檢查資料後重試。', true);
+        return;
+      }
+      notify('success',{record_id:result.record_id || result.bookingId});
+      completed = true;
+      pending = null;
+      $('form').hidden = true;
+      $('intro').hidden = true;
+      message('');
+      $('receipt-name').textContent = result.event.name;
+      $('receipt-time').textContent = result.event.date + ' ' + result.event.time;
+      $('receipt-venue').textContent = result.event.venue + '（' + result.event.address + '）';
+      $('receipt-qty').textContent = result.ticketQty + ' 位（含報名人）';
+      $('receipt-price').textContent = result.event.priceText;
+      $('receipt-distributor').textContent = result.event.distributor;
+      $('receipt-organizer').textContent = result.event.organizer;
+      setContactLink('receipt-call', result.event.contactPhone);
+      $('receipt-contact').textContent = result.event.contactText ? '修改或取消報名：' + result.event.contactText : '如需修改或取消，請向邀請你的主辦窗口洽詢。';
+      $('receipt').hidden = false;
+      $('receipt').focus();
+    }).withFailureHandler(() => uncertain()).submitRegistration(pending);
+  });
+  $('reload').addEventListener('click', load);
+  load();
+})();
+</script>
+</body>
+</html>
