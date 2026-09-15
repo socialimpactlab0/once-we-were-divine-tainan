@@ -43,13 +43,21 @@ for(const n of ['setFrozenRows','setColumnWidth','setColumnWidths','setRowHeight
 const sheets=new Map();
 const ss={getId:()=> 'test-only',getSheetByName:n=>sheets.get(n)||null,insertSheet:n=>{const sh=new Sheet(n);sheets.set(n,sh);return sh},setSpreadsheetTimeZone:()=>{},toast:()=>{}};
 let locked=false, props=new Map([['SPREADSHEET_ID','test-only']]);
+let activeEmail='', uiCalls=0;
+const triggers=[];
+function triggerBuilder(handler) {
+ const builder={timeBased:()=>builder,everyMinutes:n=>{assert.equal(n,1);return builder;},create:()=>{
+   const trigger={getHandlerFunction:()=>handler};triggers.push(trigger);return trigger;
+ }};
+ return builder;
+}
 const ctx=vm.createContext({console,Date,Set,Map,JSON,Object,Number,String,Array,Math,RegExp,
- Session:{getActiveUser:()=>({getEmail:()=>''}),getEffectiveUser:()=>({getEmail:()=> 'owner@example.com'})},
+ Session:{getActiveUser:()=>({getEmail:()=>activeEmail}),getEffectiveUser:()=>({getEmail:()=> 'owner@example.com'})},
  PropertiesService:{getScriptProperties:()=>({getProperty:k=>props.get(k),setProperty:(k,v)=>props.set(k,v)})},
  LockService:{getScriptLock:()=>({tryLock:()=>{if(locked)return false;locked=true;return true},waitLock:()=>{if(locked)throw Error('nested lock');locked=true},releaseLock:()=>{locked=false}})},
- SpreadsheetApp:{getActiveSpreadsheet:()=>ss,openById:()=>ss,flush:()=>{}},
+ SpreadsheetApp:{getActiveSpreadsheet:()=>ss,openById:()=>ss,flush:()=>{},getUi:()=>{uiCalls++;throw Error('Cannot call SpreadsheetApp.getUi() from this context.');}},
  Utilities:{getUuid:()=>crypto.randomUUID(),DigestAlgorithm:{SHA_256:'sha256'},Charset:{UTF_8:'utf8'},computeDigest:(_,t)=>[...crypto.createHash('sha256').update(t).digest()],formatDate:(d,tz,fmt)=>{const day=new Intl.DateTimeFormat('en-CA',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(d));return day}},
- ScriptApp:{getService:()=>({getUrl:()=> 'https://script.google.com/macros/s/test/exec'})},
+ ScriptApp:{getService:()=>({getUrl:()=> 'https://script.google.com/macros/s/test/exec'}),getProjectTriggers:()=>triggers,newTrigger:triggerBuilder},
 });
 vm.runInContext(fs.readFileSync(require('node:path').join(__dirname,'../gas/Code.gs'),'utf8')+'\n'+fs.readFileSync(require('node:path').join(__dirname,'../gas/Tracking.gs'),'utf8'),ctx);
 const run=code=>vm.runInContext(code,ctx);
@@ -91,6 +99,25 @@ test('success-log outage preserves booking; later refresh repairs exactly once',
  assert.equal(reg.getLastRow(),bookings+1);assert.equal(flow.getLastRow(),count);
  flow.failWrite=false;run('refreshAnalytics_()');
  assert.equal(flow.getLastRow(),count+1);run('refreshAnalytics_()');assert.equal(flow.getLastRow(),count+1);
+});
+test('setup completes without spreadsheet UI or toast',()=>{
+ activeEmail='owner@example.com';
+ ss.toast=()=>{throw Error('Spreadsheet UI unavailable');};
+ const bookings=JSON.stringify(reg.data),events=JSON.stringify(flow.data),config=JSON.stringify(sheets.get('活動設定').data);
+ assert.doesNotThrow(()=>run('setupTracking()'));
+ assert.equal(uiCalls,0);assert.equal(triggers.length,1);
+ assert.equal(props.get('SPREADSHEET_ID'),'test-only');assert.ok(props.get('TRACKING_INSTALLED_AT'));
+ assert.equal(JSON.stringify(reg.data),bookings);assert.equal(JSON.stringify(flow.data),events);
+ assert.equal(JSON.stringify(sheets.get('活動設定').data),config);
+ assert.match(sheets.get('流量分析').data[1][0],/最後更新/);
+});
+test('setup rerun preserves rows, columns and the existing minute trigger',()=>{
+ const bookings=JSON.stringify(reg.data),events=JSON.stringify(flow.data),count=sheets.size;
+ run('setupTracking()');
+ assert.equal(triggers.length,1);assert.equal(uiCalls,0);assert.equal(sheets.size,count);
+ assert.equal(reg.data[0].length,32);
+ assert.equal(JSON.stringify(reg.data),bookings);assert.equal(JSON.stringify(flow.data),events);
+ activeEmail='';
 });
 test('HTML inline scripts compile',()=>{for(const f of ['index.html','gas/Booking.html']){let html=fs.readFileSync(require('node:path').join(__dirname,'..',f),'utf8').replace('<?!= bootstrapJSON ?>','{}');for(const m of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g))new vm.Script(m[1])}});
 console.log(tests+' tests passed');

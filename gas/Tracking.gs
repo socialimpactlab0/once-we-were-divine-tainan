@@ -22,8 +22,10 @@ function setupTracking() {
     ScriptApp.newTrigger('refreshAnalytics_').timeBased().everyMinutes(1).create();
   }
   PropertiesService.getScriptProperties().setProperty('TRACKING_INSTALLED_AT',new Date().toISOString());
-  refreshAnalytics_(); onOpen();
-  active.toast('追蹤初始化完成，每分鐘更新已啟用。請將網頁應用程式更新為新版本。','流量分析',10);
+  refreshAnalytics_();
+  // Initialization also runs from the editor, where spreadsheet UI may be unavailable.
+  // onOpen creates the menu when the spreadsheet itself is opened or reloaded.
+  console.log('追蹤初始化完成，每分鐘更新已啟用。請重新整理試算表，並將網頁應用程式更新為新版本。');
 }
 function updateTrafficDashboard() { adminOnly_(); refreshAnalytics_(); }
 

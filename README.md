@@ -12,6 +12,14 @@
 
 ## 一次部署
 
+### setupTracking 的 getUi 錯誤修正（2026/09/15）
+
+若執行紀錄顯示 `Cannot call SpreadsheetApp.getUi() from this context`，且堆疊是 `onOpen → setupTracking`，請以本版 [Tracking.gs](gas/Tracking.gs) 取代原 Tracking.gs，儲存後再執行 `setupTracking`。本修正只改 Tracking.gs，不必重貼其他 GAS 檔案。初始化不再主動建立選單或顯示 toast；完成訊息改記錄在執行紀錄。開啟或重新整理 Google 試算表時，由 `onOpen` 建立選單。
+
+舊版錯誤發生在建立工作表、排程與更新分析之後，前面的操作可能已完成；不用刪除工作表、名單或排程。重跑會保留既有資料與已存在的更新觸發器。回歸測試已重現原錯誤，並驗證修正版在沒有試算表 UI 時可完成初始化及安全重跑。GAS 部署和正式寫入驗收仍須另外完成。
+
+### 安裝或更新完整版本
+
 1. 從本活動 Google Sheet 選「擴充功能 → Apps Script」，進入原本的綁定專案。先留存原始程式版本。
 2. 用 [gas/Code.gs](gas/Code.gs) 完整取代原本的「程式碼.gs」或 Code.gs 內容；同一專案不要同時保留兩份相同函式。
 3. 新增指令碼檔案 `Tracking`，貼上 [gas/Tracking.gs](gas/Tracking.gs)。
@@ -39,7 +47,7 @@
 6. 核對兩張表的 `visitor_id`、`session_id`、`record_id` 與 UTM 一致。匿名流量不得出現測試姓名／電話。
 7. 等待排程，或在編輯器執行 `updateTrafficDashboard`。測試日範圍內四個漏斗各增加一個工作階段，裝置、素材、受眾、來源表可找到測試資料。
 8. 手機與桌機各完成一次。請記錄實際驗收結果，不要把程式測試當成已送出正式測試。
-9. 待資料全部確認後，**先關閉測試頁面**，在試算表「特映會報名 → 清除指定測試」或編輯器執行 `cleanupTrackingTest`，分別輸入 `qa_0920_desktop`、`qa_0920_mobile`。只刪除這個代碼的測試報名與流量。再確認分析數字還原。
+9. 待資料全部確認後，**先關閉測試頁面**，重新整理 Google 試算表，在「特映會報名 → 清除指定驗收測試」分別輸入 `qa_0920_desktop`、`qa_0920_mobile`。這個清除功能需要試算表對話框，請從試算表選單執行。只刪除這個代碼的測試報名與流量。再確認分析數字還原。
 10. 測試瀏覽器正式使用前，清除本網站儲存空間，或改用新的無痕工作階段，避免未送完的測試佇列再次送出。不要刪除其他人的正式資料。
 
 開發者可在活動網站主框架 Console 檢查 `DivineTracking.status`：`backendReady: true` 表示新版表單已建立通訊，`pending: 0` 表示目前匿名佇列已獲後端確認；仍須核對 Sheet。原版 GAS 不支援此通訊時，網站會保留原報名流程並暫存匿名事件，不能據此宣稱流量已寫入。
