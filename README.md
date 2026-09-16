@@ -12,6 +12,14 @@
 
 ## 一次部署
 
+### 報名表欄位更新（2026/09/16）
+
+本次將「LINE 或 Email」改為「Email（選填）」並使用電子郵件輸入欄位，「從哪裡得知活動？」新增「簡訊」，移除職業輸入欄位及送出參數。
+
+既有追蹤版本使用者只需以 [Booking.html](gas/Booking.html) 完整取代原 Apps Script 專案的 Booking.html，儲存後到「部署 → 管理部署 → 編輯」，選新增版本更新原部署。GitHub Pages 嵌入的報名表由 GAS 提供，因此僅更新 GitHub 檔案不會改變線上表單。本次不需執行 setupTracking 或重建試算表。
+
+既有名單的 G 欄「LINE或Email」與 O 欄「職業」保留，避免欄位位移或影響舊資料。新表單 Email 沿用 contact 欄位寫入 G 欄；新報名不再收集職業，O 欄留空。其他追蹤資料繼續依原流程寫入。
+
 ### setupTracking 的 getUi 錯誤修正（2026/09/15）
 
 若執行紀錄顯示 `Cannot call SpreadsheetApp.getUi() from this context`，且堆疊是 `onOpen → setupTracking`，請以本版 [Tracking.gs](gas/Tracking.gs) 取代原 Tracking.gs，儲存後再執行 `setupTracking`。本修正只改 Tracking.gs，不必重貼其他 GAS 檔案。初始化不再主動建立選單或顯示 toast；完成訊息改記錄在執行紀錄。開啟或重新整理 Google 試算表時，由 `onOpen` 建立選單。

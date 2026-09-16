@@ -27,9 +27,8 @@
         <div><label for="name">報名人姓名<small>必填</small></label><input id="name" name="name" required maxlength="60" autocomplete="name" placeholder="請填寫姓名"></div>
         <div><label for="phone">聯絡電話<small>必填</small></label><input id="phone" name="phone" required type="tel" inputmode="tel" maxlength="30" autocomplete="tel" placeholder="手機或含區碼的市話"></div>
         <div><label for="quantity">報名人數<small>含本人</small></label><select id="quantity" name="ticketQty" required></select></div>
-        <div><label for="contact">LINE 或 Email<small>選填</small></label><input id="contact" name="contact" maxlength="150" placeholder="方便聯繫的方式"></div>
-        <div class="full"><label for="occupation">職業<small>選填</small></label><input id="occupation" name="occupation" maxlength="80" placeholder="例如：退休、教師、上班族"></div>
-        <div class="full"><label for="source">從哪裡得知活動？<small>選填</small></label><select id="source" name="source"><option value="">請選擇</option><option>朋友邀請</option><option>LINE</option><option>Facebook</option><option>Instagram</option><option>Threads</option><option>網站</option><option>其他</option></select></div>
+        <div><label for="contact">Email<small>選填</small></label><input id="contact" name="contact" type="email" inputmode="email" autocomplete="email" maxlength="150" placeholder="請填寫電子郵件地址"></div>
+        <div class="full"><label for="source">從哪裡得知活動？<small>選填</small></label><select id="source" name="source"><option value="">請選擇</option><option>朋友邀請</option><option>簡訊</option><option>LINE</option><option>Facebook</option><option>Instagram</option><option>Threads</option><option>網站</option><option>其他</option></select></div>
         <div class="full"><label for="note">備註<small>選填</small></label><textarea id="note" name="note" rows="2" maxlength="500" placeholder="其他需要告知的事項"></textarea></div>
       </div>
       <div class="trap" aria-hidden="true"><label for="website">請留空</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div>
@@ -156,7 +155,7 @@
       if (!$('form').reportValidity()) return;
       pending = {requestId: requestId(), eventId: eventData.id, name: $('name').value.trim(), phone: $('phone').value.trim(),
         ticketQty: Number($('quantity').value), contact: $('contact').value.trim(), source: $('source').value,
-        occupation: $('occupation').value.trim(), tracking: context, note: $('note').value.trim(), consent: $('consent').checked, website: $('website').value};
+        tracking: context, note: $('note').value.trim(), consent: $('consent').checked, website: $('website').value};
     }
     busy = true;
     $('fields').disabled = true;
